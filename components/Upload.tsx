@@ -1,8 +1,6 @@
 import { uploadApi } from "@/lib/api";
 import { useState } from "react";
 
-type FileWithPreview = File & { preview: string }; // Extend File to include preview URL
-
 export default function Upload() {
   const [files, setFiles] = useState<File[]>([]);
   const [category, setCategory] = useState<string>("");
@@ -57,11 +55,12 @@ export default function Upload() {
       }
     } catch (error) {
       setStatus("Something went wrong. Please try again.");
+      console.log(error);
     }
   };
 
   return (
-    <div className="ml-64 p-4">
+    <div className="p-4">
       <h1 className="text-3xl font-bold text-center mb-8">
         Upload Product Images
       </h1>

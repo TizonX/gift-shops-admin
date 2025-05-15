@@ -1,11 +1,26 @@
 import React from "react";
-
+import { UseFormRegister, FieldErrors, SubmitHandler } from "react-hook-form";
+type ProductFormData = {
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  image?: string;
+};
+type AddProductFormProps = {
+  register: UseFormRegister<ProductFormData>;
+  handleSubmit: (
+    onSubmit: SubmitHandler<ProductFormData>
+  ) => (e?: React.BaseSyntheticEvent) => void;
+  onSubmit: SubmitHandler<ProductFormData>;
+  errors: FieldErrors<ProductFormData>;
+};
 export default function AddProductForm({
   register,
   handleSubmit,
   onSubmit,
   errors,
-}: any) {
+}: AddProductFormProps) {
   return (
     <div className="max-w-3xl mx-auto mt-10 p-6 bg-white rounded shadow">
       <h2 className="text-2xl font-semibold mb-6">Add New Product</h2>

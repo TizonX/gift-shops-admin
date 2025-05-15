@@ -1,19 +1,25 @@
 "use client";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-// import CSVUpload from "./CSVUpload";
 import AddProductForm from "../../../components/Product/AddProductForm";
 import CSVUpload from "@/components/Product/CSVUpload";
 
+type ProductFormData = {
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  image?: string; // optional
+};
 export default function AddProdut() {
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm();
+  } = useForm<ProductFormData>();
   const [mode, setMode] = useState("form");
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: ProductFormData) => {
     try {
       const response = await fetch("/api/products", {
         method: "POST",
