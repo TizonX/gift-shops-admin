@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import AddProductForm from "../../../components/Product/AddProductForm";
+import AddProductForm from "../../../../components/Product/AddProductForm";
 import CSVUpload from "@/components/Product/CSVUpload";
 
 type ProductFormData = {
