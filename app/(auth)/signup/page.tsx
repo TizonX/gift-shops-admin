@@ -1,6 +1,7 @@
 "use client";
 import { api } from "@/lib/api";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, ChangeEvent, FormEvent } from "react";
 
 interface FormData {
@@ -8,6 +9,7 @@ interface FormData {
   email: string;
   password: string;
   phone: string;
+  role: string;
 }
 
 interface FormErrors {
@@ -18,11 +20,13 @@ interface FormErrors {
 }
 
 export default function SignupPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
     password: "",
     phone: "",
+    role: "admin",
   });
 
   const [errors, setErrors] = useState<Partial<FormErrors>>({});
@@ -90,6 +94,7 @@ export default function SignupPage() {
 
       if (res.ok) {
         setMessage("Account verified!");
+        router.push("/login");
       } else {
         const data = await res.json();
         setMessage(data.message || "Invalid OTP");

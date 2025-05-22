@@ -1,78 +1,75 @@
 "use client";
 import { useState, ChangeEvent } from "react";
-import Papa from "papaparse";
-
-type Product = {
-  name: string;
-  description: string;
-  price: string;
-  category: string;
-  image: string;
-  [key: string]: string; // allow flexibility for more fields
-};
+import { uploadApi } from "@/lib/api";
 
 export default function CSVUpload() {
-  const [csvData, setCsvData] = useState<Product[]>([]);
-  const [fileName, setFileName] = useState<string>("");
-
-  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    setError(null);
+    setSuccess(false);
     if (!file || file.type !== "text/csv") {
-      alert("Please upload a valid CSV file");
+      setError("Please upload a valid CSV file");
       return;
     }
+    const formData = new FormData();
+    formData.append("file", file);
+    setLoading(true);
+    try {
+      const response = await uploadApi("/product/upload-csv", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
 
-    setFileName(file.name);
+      if (!response.ok) setError("Upload failed");
 
-    Papa.parse<Product>(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (results) => {
-        console.log("Parsed CSV Data:", results.data);
-        setCsvData(results.data);
-      },
-      error: (error) => {
-        console.error("Parsing error:", error);
-      },
-    });
-  };
-
-  const handleUploadToBackend = () => {
-    // Replace this with your real API call (fetch/axios)
-    alert("Send parsed data to backend:\n" + JSON.stringify(csvData, null, 2));
+      const data = await response.json();
+      console.log("Upload success:", data);
+      setSuccess(true);
+    } catch (error) {
+      setError("Something went wrong during upload. Please try again.");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="p-4 border rounded shadow max-w-xl mx-auto">
       <h2 className="text-xl font-semibold mb-4">Bulk Upload Products (CSV)</h2>
 
-      <input
-        type="file"
-        accept=".csv"
-        onChange={handleFileUpload}
-        className="w-full border p-2 rounded mb-4"
-      />
+      {loading && (
+        <div className="loading-screen" style={{ margin: 20, color: "blue" }}>
+          Uploading file, please wait...
+        </div>
+      )}
 
-      {csvData.length > 0 && (
+      {!loading && !success && (
         <>
-          <p className="text-sm text-gray-600 mb-2">File: {fileName}</p>
-
-          <div className="max-h-64 overflow-y-auto border rounded p-2 bg-gray-50 text-sm mb-4">
-            <pre>{JSON.stringify(csvData.slice(0, 5), null, 2)}</pre>
-            {csvData.length > 5 && (
-              <p className="text-xs text-gray-400 mt-2">
-                ...and {csvData.length - 5} more rows
-              </p>
-            )}
-          </div>
-
-          <button
-            onClick={handleUploadToBackend}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-          >
-            Upload to Backend
-          </button>
+          <input type="file" accept=".csv" onChange={handleFileUpload} />
         </>
+      )}
+
+      {error && (
+        <div
+          className="error-message"
+          style={{ color: "red", marginTop: 20, textAlign: "center" }}
+        >
+          <p>{error}</p>
+          <button onClick={() => setError(null)}>Try Again</button>
+        </div>
+      )}
+
+      {success && (
+        <div
+          className="success-message"
+          style={{ color: "green", marginTop: 20, textAlign: "center" }}
+        >
+          File uploaded successfully!
+        </div>
       )}
     </div>
   );
